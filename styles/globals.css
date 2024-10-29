@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #171717;
+    --primary: theme(colors.red.600);
+    --primary-foreground: #ffffff;
+    --secondary: theme(colors.red.800);
+    --secondary-foreground: #ffffff;
+    --border: #e5e7eb;
+  }
+
+  .dark {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --primary: theme(colors.red.500);
+    --primary-foreground: #ffffff;
+    --secondary: theme(colors.red.700);
+    --secondary-foreground: #ffffff;
+    --border: #27272a;
+  }
+}
+
+body {
+  @apply bg-background text-foreground;
+}
