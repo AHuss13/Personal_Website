@@ -15,7 +15,7 @@ export function Hero() {
             Hi, I&apos;m <span className="text-primary">Adam</span>
           </h1>
           <p className="mt-6 text-lg text-foreground/80 sm:text-xl">
-            A passionate developer building amazing web experiences
+            I like to make stuff and solve problems.
           </p>
           {/* <div className="mt-8 flex gap-4">
             <a
