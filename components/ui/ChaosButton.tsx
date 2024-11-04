@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "./Button";
-import { applyRandomColors, resetColors } from "@/utils/colors";
+import { applyRandomColors, resetColors } from "@/lib/utils/colors";
 import { useState } from "react";
 
 export function ChaosButton() {
