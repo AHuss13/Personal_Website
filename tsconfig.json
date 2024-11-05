@@ -25,7 +25,7 @@
       "@/styles/*": ["./styles/*"],
       "@/types/*": ["./types/*"],
       "@/hooks/*": ["./hooks/*"],
-      "@/utils/*": ["./utils/*"],
+      "@/utils/*": ["./lib/utils/*"],
       "@/public/*": ["./public/*"]
     }
   },
