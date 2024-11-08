@@ -27,6 +27,7 @@ export default function Contact() {
     }));
   };
 
+  {/* TODO: Make this send a message to me on the backend in the future */}
   return (
     <main className="min-h-screen p-8">
       <motion.div
@@ -36,7 +37,6 @@ export default function Contact() {
         className="max-w-2xl mx-auto"
       >
         <h1 className="text-4xl font-bold mb-6">Contact Me</h1>
-        {/* TODO: Make this send a message to my email */}
         <p className="mb-8 text-foreground/80">
           Have a question or want to work together? Feel free to reach out!
         </p>
