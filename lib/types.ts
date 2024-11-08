@@ -5,9 +5,3 @@ export interface Project {
   link?: string;
   image?: string;
 }
-
-export interface ProjectCategories {
-  web: Project[];
-  modeling: Project[];
-  misc: Project[];
-}

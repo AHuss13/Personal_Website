@@ -3,9 +3,9 @@ import { Instagram } from "lucide-react";
 export function Footer() {
   return (
     <footer className="border-t border-border">
-      <div className="container py-6 flex justify-between items-center">
+      <div className="container py-6 px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div>
-          <p className="text-sm text-foreground/60">
+          <p className="text-sm text-foreground/60 text-center sm:text-left">
             © {new Date().getFullYear()} Adam Huss. All rights reserved.
           </p>
         </div>
