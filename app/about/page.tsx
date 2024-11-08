@@ -14,22 +14,31 @@ export default function About() {
 
       <div className="max-w-3xl">
         <p className="mb-4">
-          Hi! I&apos;m a passionate software developer with a love for creating
-          elegant solutions to complex problems. I specialize in web development
-          using modern technologies like React, Next.js, and TypeScript.
+          I am a web developer with a passion for building products that solve
+          real-world problems. I am a quick learner and always looking to expand
+          my skill set.
         </p>
 
         <p className="mb-4">
-          With several years of experience in the field, I&apos;ve worked on a
-          variety of projects ranging from small business websites to
-          large-scale enterprise applications. I&apos;m always eager to learn
-          new technologies and stay up-to-date with the latest industry trends.
+          Although I&apos;m relatively new to coding with about a year of
+          experience, I&apos;ve already worked on several personal and
+          collaborative projects that have helped me grow as a developer. I have
+          much less care for how I can financially benefit from a project, and
+          more care for how I can learn from it or help others with it.
         </p>
 
         <p className="mb-4">
-          When I&apos;m not coding, you can find me exploring new technologies,
-          contributing to open-source projects, or sharing my knowledge through
-          blog posts and technical tutorials.
+          Honesty and truth are the most important values to me.
+        </p>
+
+        <p className="mb-4">
+          I am a firm believer in the power of collaboration and the importance
+          of building products that are accessible to everyone.
+        </p>
+
+        <p className="mb-4">
+          I would love to work with a team of like-minded individuals to build
+          products that are functional, fun, and easy to use.
         </p>
 
         <div className="mt-8">
@@ -40,6 +49,7 @@ export default function About() {
             <li>HTML & CSS</li>
             <li>Node.js</li>
             <li>SQL & NoSQL Databases</li>
+            <li>Python</li>
             <li>Git & Version Control</li>
           </ul>
         </div>
