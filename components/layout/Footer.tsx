@@ -1,5 +1,3 @@
-import { Instagram } from "lucide-react";
-
 export function Footer() {
   return (
     <footer className="border-t border-border">
@@ -20,9 +18,7 @@ export function Footer() {
             href="#"
             className="hover:text-primary transition-colors"
             aria-label="Instagram"
-          >
-            <Instagram className="h-5 w-5" />
-          </a>
+          ></a>
         </div>
       </div>
     </footer>
