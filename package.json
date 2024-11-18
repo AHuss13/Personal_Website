@@ -28,12 +28,14 @@
     "react-hook-form": "^7.53.1",
     "sharp": "^0.33.5",
     "tailwind-merge": "^2.5.4",
+    "three": "^0.168.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^22.8.2",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@types/three": "^0.170.0",
     "eslint": "9.13.0",
     "eslint-config-next": "15.0.1",
     "postcss": "^8.4.47",
