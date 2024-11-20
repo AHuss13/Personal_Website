@@ -44,7 +44,8 @@ export default function ContactForm() {
         });
         setFormData({ name: "", email: "", message: "" });
       }
-    } catch (error) {
+    } catch (err: unknown) {
+      console.error("Email send error:", err);
       setStatus({
         type: "error",
         message: "Sorry, something went wrong. Please try again later.",
