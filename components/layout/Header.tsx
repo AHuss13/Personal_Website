@@ -84,14 +84,14 @@ function NavLinks({ isActive }: { isActive: (path: string) => boolean }) {
       >
         About
       </Link>
-      {/* <Link
+      <Link
         href="/contact"
         className={`hover:text-primary transition-colors ${
           isActive("/contact") ? "text-primary font-medium" : ""
         }`}
       >
         Contact
-      </Link> */}
+      </Link>
     </>
   );
 }

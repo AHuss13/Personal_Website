@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/Card";
 import { motion } from "framer-motion";
+import { ModelViewer } from "@/components/3d/ModelViewer";
 
 export default function ModelingWork() {
   const modelingProjects = [
@@ -15,6 +16,7 @@ export default function ModelingWork() {
       title: "Blender Donut",
       description: "A clip of a donut model I made in Blender.",
       video: "/videos/Donuts.mp4",
+      model: "/models/donut.gltf",
       software: ["Blender"],
     },
   ];
@@ -60,6 +62,10 @@ export default function ModelingWork() {
                     Your browser does not support the video tag.
                   </video>
                 )}
+                <br />
+                <div className="flex flex-col gap-4">
+                  {<ModelViewer modelPath={project.model} />}
+                </div>
               </CardContent>
             </Card>
           ))}
