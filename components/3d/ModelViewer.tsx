@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 
 interface ModelViewerProps {
   modelPath: string;
@@ -33,26 +32,79 @@ export function ModelViewer({ modelPath }: ModelViewerProps) {
     camera.position.z = 5;
 
     // Setup renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      preserveDrawingBuffer: true,
+    });
     renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1;
     container.appendChild(renderer.domElement);
 
     // Add lights
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
+
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
     directionalLight.position.set(5, 5, 5);
+    directionalLight.castShadow = true;
     scene.add(directionalLight);
+
+    // Add a hemisphere light for better ambient lighting
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.5);
+    hemiLight.position.set(0, 20, 0);
+    scene.add(hemiLight);
 
     // Add controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 0;
+    controls.maxDistance = 8;
+    controls.target.set(0, 0, 0);
 
     // Load model
     const loader = new GLTFLoader();
     loader.load(
       modelPath,
-      (gltf: GLTF) => {
+      (gltf) => {
+        const mesh = gltf.scene;
+        mesh.traverse((child) => {
+          if ((child as THREE.Mesh).isMesh) {
+            const mesh = child as THREE.Mesh;
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+
+            // Handle materials
+            if (mesh.material) {
+              // Handle both single materials and material arrays
+              const materials = Array.isArray(mesh.material)
+                ? mesh.material
+                : [mesh.material];
+
+              materials.forEach((material) => {
+                // Force double-sided rendering
+                material.side = THREE.DoubleSide;
+                // Ensure proper color space
+                if ("map" in material && material.map) {
+                  (material.map as THREE.Texture).colorSpace =
+                    THREE.SRGBColorSpace;
+                }
+                // Disable transparency unless specifically needed
+                material.transparent = false;
+                // Enable proper depth testing
+                material.depthTest = true;
+                material.depthWrite = true;
+                // Update material
+                material.needsUpdate = true;
+              });
+            }
+          }
+        });
+
         scene.add(gltf.scene);
 
         // Center and scale model
@@ -61,10 +113,14 @@ export function ModelViewer({ modelPath }: ModelViewerProps) {
         const size = box.getSize(new THREE.Vector3());
 
         const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 3 / maxDim;
+        const scale = 4 / maxDim;
         gltf.scene.scale.setScalar(scale);
 
         gltf.scene.position.sub(center.multiplyScalar(scale));
+
+        // Update controls target to center of model
+        controls.target.copy(gltf.scene.position);
+        controls.update();
       },
       (progress: { loaded: number; total: number }) => {
         const percentComplete = (progress.loaded / progress.total) * 100;

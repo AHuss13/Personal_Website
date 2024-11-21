@@ -16,7 +16,7 @@ export default function ModelingWork() {
       title: "Blender Donut",
       description: "A clip of a donut model I made in Blender.",
       video: "/videos/Donuts.mp4",
-      model: "/models/donut.gltf",
+      model: "/models/WebDonut.gltf",
       software: ["Blender"],
     },
   ];
