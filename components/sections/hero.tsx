@@ -15,7 +15,7 @@ export function Hero() {
             Hi, I&apos;m <span className="text-primary">Adam</span>
           </h1>
           <p className="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl text-foreground/80">
-            I just want to solve problems and learn new things.
+            I just want to <span className="text-primary">help</span> people, <span className="text-primary">solve</span> problems, and <span className="text-primary">learn</span> new things. Let's work together!
           </p>
         </motion.div>
         <div className="mt-4"></div>

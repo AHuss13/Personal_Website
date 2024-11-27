@@ -29,7 +29,7 @@ export function ModelViewer({ modelPath }: ModelViewerProps) {
       0.1,
       1000
     );
-    camera.position.z = 5;
+    camera.position.set(1, 2, 5);
 
     // Setup renderer
     const renderer = new THREE.WebGLRenderer({
@@ -64,6 +64,10 @@ export function ModelViewer({ modelPath }: ModelViewerProps) {
     controls.dampingFactor = 0.05;
     controls.minDistance = 0;
     controls.maxDistance = 8;
+    controls.touches = {
+      ONE: THREE.TOUCH.ROTATE,
+      TWO: THREE.TOUCH.DOLLY_PAN,
+    };
     controls.target.set(0, 0, 0);
 
     // Load model
@@ -113,13 +117,18 @@ export function ModelViewer({ modelPath }: ModelViewerProps) {
         const size = box.getSize(new THREE.Vector3());
 
         const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 4 / maxDim;
+        const scale = 5 / maxDim;
         gltf.scene.scale.setScalar(scale);
 
         gltf.scene.position.sub(center.multiplyScalar(scale));
 
         // Update controls target to center of model
         controls.target.copy(gltf.scene.position);
+        controls.update();
+
+        // Make sure to use the same position after model loads
+        camera.position.set(1, 2, 5);
+        controls.target.set(0, 0, 0);
         controls.update();
       },
       (progress: { loaded: number; total: number }) => {
