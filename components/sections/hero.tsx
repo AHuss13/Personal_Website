@@ -1,10 +1,11 @@
 "use client";
-
+import { HomeCanvas } from "../3d/HomeCanvas";
 import { motion } from "framer-motion";
 
 export function Hero() {
   return (
     <section className="container flex min-h-[calc(100vh-3.5rem)] max-w-screen-2xl items-center px-4 sm:px-6">
+      <HomeCanvas />
       <div className="relative w-full">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
