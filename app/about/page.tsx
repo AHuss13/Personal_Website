@@ -36,8 +36,8 @@ export default function About() {
           <li className="flex items-start">
             <span>
               - My focus is on learning and creating meaningful impact rather
-              than financial gain. I'm driven by the opportunity to help others
-              through technology.
+              than financial gain. I&apos;m driven by the opportunity to help
+              others through technology.
             </span>
           </li>
 
