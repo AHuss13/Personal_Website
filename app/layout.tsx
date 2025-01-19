@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { HomeCanvas } from "@/components/3d/HomeCanvas";
 import { SITE_CONFIG } from "@/lib/constants";
 import "@/styles/globals.css";
 
@@ -36,13 +37,14 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col bg-background text-foreground">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          enableSystem={true}
           disableTransitionOnChange
         >
+          <HomeCanvas />
           <Header />
           <Suspense fallback={<div>Loading...</div>}>
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 relative">{children}</main>
           </Suspense>
           <Footer />
         </ThemeProvider>

@@ -1,188 +1,239 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { ModelingProject } from "@/lib/data/modelingProjects";
 
 interface ModelViewerProps {
   modelPath: string;
+  settings?: ModelingProject["modelSettings"];
 }
 
-export function ModelViewer({ modelPath }: ModelViewerProps) {
+export function ModelViewer({ modelPath, settings = {} }: ModelViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 400 });
+  const sceneRef = useRef<{
+    scene: THREE.Scene;
+    camera: THREE.PerspectiveCamera;
+    renderer: THREE.WebGLRenderer;
+    controls: OrbitControls;
+    animationFrameId?: number;
+  }>();
 
+  // Handle initial container size
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Capture the current value
+    // Store ref value in a variable for cleanup
     const container = containerRef.current;
 
-    // Setup scene
+    const updateSize = () => {
+      if (!container) return;
+      const width = container.clientWidth;
+      setContainerSize({ width, height: 400 });
+    };
+
+    updateSize();
+    window.addEventListener("resize", updateSize);
+
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current || containerSize.width === 0) return;
+
+    // Store ref value in a variable for cleanup
+    const container = containerRef.current;
+
+    // Clean up previous scene if it exists
+    if (sceneRef.current) {
+      const { renderer, controls, animationFrameId } = sceneRef.current;
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      controls.dispose();
+      renderer.dispose();
+      container.removeChild(renderer.domElement);
+    }
+
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a1a);
+    scene.background = new THREE.Color(settings.background ?? 0x000000);
 
-    // Setup camera
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      container.clientWidth / container.clientHeight,
-      0.1,
-      1000
+    const ambientLight = new THREE.AmbientLight(
+      0xffffff,
+      settings.lights?.ambient?.intensity ?? 1
     );
-    camera.position.set(1, 2, 5);
-
-    // Setup renderer
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      preserveDrawingBuffer: true,
-    });
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1;
-    container.appendChild(renderer.domElement);
-
-    // Add lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(5, 5, 5);
-    directionalLight.castShadow = true;
-    scene.add(directionalLight);
+    const pointLight = new THREE.PointLight(
+      0xffffff,
+      settings.lights?.point?.intensity ?? 1
+    );
+    pointLight.position.set(
+      settings.lights?.point?.position?.x ?? 5,
+      settings.lights?.point?.position?.y ?? 5,
+      settings.lights?.point?.position?.z ?? 5
+    );
+    scene.add(pointLight);
 
-    // Add a hemisphere light for better ambient lighting
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.5);
-    hemiLight.position.set(0, 20, 0);
-    scene.add(hemiLight);
+    // Default camera settings
+    const DEFAULT_CAMERA = {
+      position: { x: 0, y: 0, z: 5 },
+      fov: 75,
+    };
 
-    // Add controls
+    const camera = new THREE.PerspectiveCamera(
+      settings.camera?.fov ?? 75,
+      containerRef.current.clientWidth / containerRef.current.clientHeight,
+      settings.camera?.near ?? 0.1,
+      settings.camera?.far ?? 1000
+    );
+
+    // Use default position unless overridden by settings
+    camera.position.set(
+      settings.camera?.position?.x ?? DEFAULT_CAMERA.position.x,
+      settings.camera?.position?.y ?? DEFAULT_CAMERA.position.y,
+      settings.camera?.position?.z ?? DEFAULT_CAMERA.position.z
+    );
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(containerSize.width, containerSize.height);
+    containerRef.current.appendChild(renderer.domElement);
+
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.minDistance = 0;
-    controls.maxDistance = 8;
+
+    // Configure controls
+    controls.enableDamping = settings.controls?.enableDamping ?? true;
+    controls.dampingFactor = settings.controls?.dampingFactor ?? 0.05;
+    controls.screenSpacePanning = true;
+
+    // Set up mouse buttons
+    controls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.DOLLY,
+      RIGHT: THREE.MOUSE.PAN,
+    };
+    controls.minDistance = settings.controls?.minDistance ?? 1;
+    controls.maxDistance = settings.controls?.maxDistance ?? 10;
     controls.touches = {
       ONE: THREE.TOUCH.ROTATE,
       TWO: THREE.TOUCH.DOLLY_PAN,
     };
+
+    // Configure zoom
+    controls.enableZoom = true;
+    controls.zoomSpeed = settings.controls?.zoomSpeed ?? 1.0;
+    controls.minDistance = 0;
+    controls.maxDistance = 10;
+
+    // Set initial camera target to origin
     controls.target.set(0, 0, 0);
+    controls.update();
 
-    // Load model
-    const loader = new GLTFLoader();
-    loader.load(
-      modelPath,
-      (gltf) => {
-        const mesh = gltf.scene;
-        mesh.traverse((child) => {
-          if ((child as THREE.Mesh).isMesh) {
-            const mesh = child as THREE.Mesh;
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-
-            // Handle materials
-            if (mesh.material) {
-              // Handle both single materials and material arrays
-              const materials = Array.isArray(mesh.material)
-                ? mesh.material
-                : [mesh.material];
-
-              materials.forEach((material) => {
-                // Force double-sided rendering
-                material.side = THREE.DoubleSide;
-                // Ensure proper color space
-                if ("map" in material && material.map) {
-                  (material.map as THREE.Texture).colorSpace =
-                    THREE.SRGBColorSpace;
-                }
-                // Disable transparency unless specifically needed
-                material.transparent = false;
-                // Enable proper depth testing
-                material.depthTest = true;
-                material.depthWrite = true;
-                // Update material
-                material.needsUpdate = true;
-              });
-            }
-          }
-        });
-
-        scene.add(gltf.scene);
-
-        // Center and scale model
-        const box = new THREE.Box3().setFromObject(gltf.scene);
+    if (modelPath.endsWith(".obj")) {
+      const loader = new OBJLoader();
+      loader.load(modelPath, (obj) => {
+        const box = new THREE.Box3().setFromObject(obj);
         const center = box.getCenter(new THREE.Vector3());
+        obj.position.sub(center);
+
         const size = box.getSize(new THREE.Vector3());
-
         const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 5 / maxDim;
-        gltf.scene.scale.setScalar(scale);
+        const scale = (settings.scale ?? 2) / maxDim;
+        obj.scale.multiplyScalar(scale);
 
-        gltf.scene.position.sub(center.multiplyScalar(scale));
+        if (settings.position) {
+          obj.position.set(
+            settings.position.x,
+            settings.position.y,
+            settings.position.z
+          );
+        }
 
-        // Update controls target to center of model
-        controls.target.copy(gltf.scene.position);
-        controls.update();
+        scene.add(obj);
+      });
+    } else if (modelPath.endsWith(".gltf") || modelPath.endsWith(".glb")) {
+      const loader = new GLTFLoader();
+      loader.load(modelPath, (gltf) => {
+        const model = gltf.scene;
 
-        // Make sure to use the same position after model loads
-        camera.position.set(1, 2, 5);
-        controls.target.set(0, 0, 0);
-        controls.update();
-      },
-      (progress: { loaded: number; total: number }) => {
-        const percentComplete = (progress.loaded / progress.total) * 100;
-        console.log(`Loading: ${percentComplete}%`);
-      },
-      (error: unknown) => {
-        console.error("Error loading model:", error);
-      }
-    );
+        const box = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        model.position.sub(center);
 
-    // Animation loop
-    function animate() {
-      requestAnimationFrame(animate);
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = (settings.scale ?? 2) / maxDim;
+        model.scale.multiplyScalar(scale);
+
+        if (settings.position) {
+          model.position.set(
+            settings.position.x,
+            settings.position.y,
+            settings.position.z
+          );
+        }
+
+        scene.add(model);
+      });
+    }
+
+    const animate = () => {
+      const frameId = requestAnimationFrame(animate);
       controls.update();
       renderer.render(scene, camera);
-    }
+      // Store animation frame ID for cleanup
+      if (sceneRef.current) {
+        sceneRef.current.animationFrameId = frameId;
+      }
+    };
+
+    // Store scene references
+    sceneRef.current = {
+      scene,
+      camera,
+      renderer,
+      controls,
+    };
+
     animate();
 
-    // Handle resize
-    function handleResize() {
-      if (!container) return;
-      camera.aspect = container.clientWidth / container.clientHeight;
+    const handleResize = () => {
+      if (!container || !sceneRef.current) return;
+      const { camera, renderer } = sceneRef.current;
+      const width = container.clientWidth;
+      camera.aspect = width / containerSize.height;
       camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
-    }
+      renderer.setSize(width, containerSize.height);
+    };
+
     window.addEventListener("resize", handleResize);
 
-    // Enhanced cleanup
     return () => {
       window.removeEventListener("resize", handleResize);
-
-      // Dispose of scene resources
-      scene.traverse((object) => {
-        if (object instanceof THREE.Mesh) {
-          object.geometry.dispose();
-          if (object.material instanceof THREE.Material) {
-            object.material.dispose();
-          } else if (Array.isArray(object.material)) {
-            object.material.forEach((material) => material.dispose());
-          }
+      if (sceneRef.current) {
+        const { renderer, controls, animationFrameId } = sceneRef.current;
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        controls.dispose();
+        renderer.dispose();
+        if (container.contains(renderer.domElement)) {
+          container.removeChild(renderer.domElement);
         }
-      });
-
-      // Dispose of renderer
-      renderer.dispose();
-      container?.removeChild(renderer.domElement);
-
-      // Stop animation loop
-      renderer.setAnimationLoop(null);
+      }
+      sceneRef.current = undefined;
     };
-  }, [modelPath]);
+  }, [modelPath, settings, containerSize.width, containerSize.height]);
 
   return (
-    <div ref={containerRef} className="w-full h-[400px] rounded-lg relative" />
+    <div
+      ref={containerRef}
+      style={{
+        width: "100%",
+        height: `${containerSize.height}px`,
+        position: "relative",
+      }}
+      className="rounded-lg"
+    />
   );
 }

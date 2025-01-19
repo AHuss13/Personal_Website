@@ -27,3 +27,7 @@
 body {
   @apply bg-background text-foreground;
 }
+
+/* .text-bloom {
+  text-shadow: 0 0 4px rgba(255, 255, 255, 1);
+} */

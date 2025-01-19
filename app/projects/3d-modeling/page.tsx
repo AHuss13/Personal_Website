@@ -10,23 +10,12 @@ import {
 import { motion } from "framer-motion";
 import { ModelViewer } from "@/components/3d/ModelViewer";
 import Head from "next/head";
+import { modelingProjects } from "@/lib/data/modelingProjects";
 
 export default function ModelingWork() {
-  const title = "3D Modeling Portfolio - Your Name";
+  const title = "3D Modeling Portfolio";
   const description =
     "Explore my 3D modeling projects created with Blender and other tools. View interactive 3D models and animations.";
-
-  const modelingProjects = [
-    {
-      title: "Blender Donut",
-      description:
-        "A realistic 3D model of a donut created in Blender, featuring detailed texturing and materials.",
-      video: "/videos/Donuts.mp4",
-      model: "/models/WebDonut.gltf",
-      software: ["Blender"],
-      alt: "3D model of a glazed donut with sprinkles",
-    },
-  ];
 
   return (
     <>
@@ -89,7 +78,6 @@ export default function ModelingWork() {
                       loop
                       playsInline
                       aria-label={`Video demonstration of ${project.title}`}
-                      mb-4
                     >
                       <source src={project.video} type="video/mp4" />
                       <track
@@ -110,7 +98,10 @@ export default function ModelingWork() {
                   <br />
                   Scroll wheel to <b>Zoom</b>
                   <div className="flex flex-col gap-4 mt-4">
-                    <ModelViewer modelPath={project.model} />
+                    <ModelViewer
+                      modelPath={project.model}
+                      settings={project.modelSettings}
+                    />
                   </div>
                 </CardContent>
               </Card>
